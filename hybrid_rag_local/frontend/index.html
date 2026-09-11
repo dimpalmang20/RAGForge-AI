@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hybrid RAG Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="side-panel">
+      <div class="hero-block">
+        <p class="eyebrow">Hybrid RAG Workspace</p>
+        <h1>Chat with indexed documents, not guesses.</h1>
+        <p class="lede">Upload source files, continue follow-up questions in the same conversation, and inspect grounded answers with citations from your local knowledge base.</p>
+        <div class="metric-row">
+          <div class="metric-pill">
+            <span class="metric-label">Retrieval</span>
+            <strong>BM25 + Semantic</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">Tracing</span>
+            <strong>LangSmith</strong>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel-card status-card">
+        <div class="status-row">
+          <span>API Status</span>
+          <span id="healthBadge" class="badge badge-idle">Unknown</span>
+        </div>
+        <p class="status-copy">The main workflow is kept simple. Backend-style controls live under advanced settings.</p>
+        <button id="checkHealthButton" class="ghost-button" type="button">Check Connection</button>
+      </section>
+
+      <section class="panel-card identity-card">
+        <h2>Current Workspace</h2>
+        <div class="identity-grid">
+          <div class="identity-chip">
+            <span class="metric-label">User Scope</span>
+            <strong id="currentUserLabel">alice</strong>
+          </div>
+          <div class="identity-chip">
+            <span class="metric-label">Session</span>
+            <strong id="currentSessionLabel">session-ui-1</strong>
+          </div>
+        </div>
+        <button id="newSessionButton" class="ghost-button" type="button">Start New Session</button>
+      </section>
+
+      <details class="panel-card advanced-card">
+        <summary>Advanced Settings</summary>
+        <div class="advanced-grid">
+          <div>
+            <label for="apiBaseUrl">API Base URL</label>
+            <input id="apiBaseUrl" type="text" value="http://127.0.0.1:8000">
+          </div>
+          <div>
+            <label for="ingestUserId">User ID</label>
+            <input id="ingestUserId" type="text" value="alice">
+          </div>
+          <div>
+            <label for="chatUserId">Chat User ID</label>
+            <input id="chatUserId" type="text" value="alice">
+          </div>
+          <div>
+            <label for="sessionId">Session ID</label>
+            <input id="sessionId" type="text" value="session-ui-1">
+          </div>
+          <div class="advanced-path-group">
+            <label for="filePath">Backend Local File Path</label>
+            <input id="filePath" type="text" placeholder="D:/Hybrid/customer_support_policy.txt">
+            <button id="ingestPathButton" class="ghost-button" type="submit" form="ingestForm">Ingest Backend Path</button>
+          </div>
+        </div>
+      </details>
+    </aside>
+
+    <main class="workspace">
+      <section class="workspace-card">
+        <div class="section-heading">
+          <p class="eyebrow">Ingest</p>
+          <h2>Build the knowledge base</h2>
+          <p class="section-copy">Upload a `.txt` or `.md` file directly. Use backend local path ingest only when the server machine already has access to the file.</p>
+        </div>
+        <form id="ingestForm" class="stack-form">
+          <label for="uploadFile">Upload File</label>
+          <input id="uploadFile" type="file" accept=".txt,.md">
+          <div class="button-row">
+            <button id="uploadButton" class="primary-button" type="button">Upload and Ingest</button>
+            <button id="resetKnowledgeButton" class="ghost-button" type="button">Reset User Knowledge</button>
+          </div>
+        </form>
+        <pre id="ingestResult" class="result-box">No ingest request sent yet.</pre>
+      </section>
+
+      <section class="workspace-card">
+        <div class="section-heading">
+          <p class="eyebrow">Chat</p>
+          <h2>Ask grounded questions</h2>
+          <p class="section-copy">Keep the same session for follow-up questions. Start a new session when you want a clean conversation.</p>
+        </div>
+        <form id="chatForm" class="stack-form">
+          <label for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="Ask a direct question, then continue with a follow-up in the same session." required></textarea>
+          <div class="button-row">
+            <button id="sendButton" class="primary-button" type="submit">Send Message</button>
+            <button id="resetMemoryButton" class="ghost-button" type="button">Reset Session Memory</button>
+          </div>
+          <p class="helper-text">Multi-user support is handled by user ID plus session ID in the backend, but those identifiers are managed here as workspace settings instead of the main chat surface.</p>
+        </form>
+      </section>
+
+      <section class="workspace-card responses-card">
+        <div class="section-heading">
+          <p class="eyebrow">Responses</p>
+          <h2>Conversation timeline</h2>
+          <p class="section-copy">Assistant replies appear here with the retrieved source chunks used to ground the answer.</p>
+        </div>
+        <div id="conversation" class="conversation-list">
+          <div id="emptyState" class="empty-state">
+            <h3>No conversation yet</h3>
+            <p>Upload a file, then ask a direct question like “What are the office hours?” to validate retrieval quickly.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="messageTemplate">
+    <article class="message-card">
+      <div class="message-header">
+        <span class="message-role"></span>
+        <span class="message-session"></span>
+      </div>
+      <p class="message-body"></p>
+      <div class="sources-block">
+        <h3>Sources</h3>
+        <div class="sources-list"></div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

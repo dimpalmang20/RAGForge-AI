@@ -1,0 +1,11 @@
+fastapi
+langchain
+langchain-community
+langchain-ollama
+langchain-text-splitters
+langsmith
+python-dotenv
+python-multipart
+qdrant-client
+rank-bm25
+uvicorn

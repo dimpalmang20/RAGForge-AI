@@ -1,0 +1,8 @@
+Mini RAG Test Notes
+
+Office hours are Monday to Friday from 10:00 AM to 5:00 PM.
+Refund requests are allowed within 7 days of purchase.
+The starter plan supports TXT and MD files only.
+PDF upload is not enabled in this version.
+Session memory is stored in memory and resets when the server restarts.
+LangSmith tracing works when LANGSMITH_TRACING is true.

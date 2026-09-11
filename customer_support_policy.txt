@@ -1,0 +1,20 @@
+Hybrid Retail Support Policy
+
+Customer support hours are Monday to Friday, 9:00 AM to 6:00 PM local time.
+Standard response time for email tickets is within 4 business hours.
+Priority response time for urgent production issues is within 1 business hour.
+
+Customers can request refunds within 14 days of purchase if the service has not exceeded 20 percent of the monthly usage quota.
+Refund requests must include the account email, order ID, and reason for cancellation.
+
+The onboarding package includes one setup call, document ingestion help, and basic retrieval tuning.
+The onboarding package does not include custom frontend development or single sign-on integration.
+
+Supported file types for the starter deployment are TXT and MD.
+PDF support is not enabled in the minimal local starter.
+
+User data is isolated by user ID at the application layer when documents are ingested with a user ID.
+Session chat history is stored in memory and is cleared when the API process restarts.
+
+LangSmith tracing is enabled when LANGSMITH_TRACING is true and a valid LANGSMITH_API_KEY is configured.
+Qdrant stores chunk vectors and metadata, and Ollama is used for both generation and embeddings.
