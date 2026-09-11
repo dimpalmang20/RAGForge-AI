@@ -1,29 +1,6 @@
-# Environment secrets
-.env
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Uploads (runtime files)
-hybrid_rag_local/uploads/
-
-# Virtual environments
 venv/
 .venv/
-env/
-
-# Distribution / packaging
-dist/
-build/
-*.egg-info/
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
+.env
+__pycache__/
+*.pyc
+uploads/*

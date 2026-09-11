@@ -1,169 +1,257 @@
-# Hybrid RAG Local
+# 🤖 RAGForge AI
 
-A minimal, self-hosted **Hybrid Retrieval-Augmented Generation** stack running entirely on your machine.  
-Combines BM25 sparse search with dense semantic search, multi-user document scoping, session memory, and optional LangSmith tracing — all over a FastAPI backend with a lightweight browser UI.
+> **A Local-First Hybrid Retrieval-Augmented Generation (RAG) Application powered by Qwen, Ollama, LangChain, Qdrant, FastAPI, and BM25.**
 
----
+RAGForge AI is an end-to-end **Generative AI and Retrieval-Augmented Generation application** that allows users to upload documents and ask questions based on their content.
 
-## Repo Structure
+Instead of depending only on the pretrained knowledge of an LLM, RAGForge AI retrieves relevant information from the user's documents and provides that context to a local Large Language Model before generating the final answer.
 
-```
-Hybrid/
-├── hybrid_rag_local/       # Core application
-│   ├── app/
-│   │   ├── main.py         # FastAPI routes
-│   │   ├── config.py       # Environment settings
-│   │   ├── models.py       # Request / response schemas
-│   │   ├── rag_service.py  # Chat and ingest orchestration
-│   │   ├── retriever.py    # BM25 + dense hybrid retrieval
-│   │   ├── ingest.py       # File loading and indexing
-│   │   ├── prompts.py      # Grounded prompt templates
-│   │   └── memory.py       # In-process session store
-│   ├── frontend/
-│   │   ├── index.html      # Browser UI shell
-│   │   ├── styles.css      # UI styling
-│   │   └── app.js          # Frontend API wiring
-│   ├── uploads/            # Uploaded files (runtime)
-│   ├── requirements.txt
-│   ├── README.md           # Detailed usage and API guide
-│   └── DEPLOYMENT.md       # EC2 and EKS deployment guide
-├── customer_support_policy.txt   # Sample ingest document
-└── mini_rag_test.txt             # Minimal test document
-```
+The project demonstrates a complete local RAG pipeline including:
+
+**Document Ingestion → Chunking → Embeddings → Vector Storage → Hybrid Retrieval → Context Augmentation → LLM Generation**
 
 ---
 
-## Key Features
+## 🖥️ Application Preview
 
-| Feature | Detail |
+![RAGForge AI Application](assets/ragforge-ai-ui.png)
+
+### RAGForge AI Workspace
+
+The application provides a simple workspace where users can:
+
+- Upload knowledge documents
+- Build a local knowledge base
+- Ask questions about uploaded documents
+- Continue conversations using session memory
+- Retrieve grounded answers from indexed documents
+- Reset user knowledge
+- Reset conversation memory
+- Monitor backend API health
+
+---
+
+# 📌 Introduction
+
+Large Language Models can generate impressive answers, but they do not automatically know the contents of a user's private or newly uploaded documents.
+
+RAG solves this problem by retrieving relevant information from an external knowledge source and providing that information to the LLM as context.
+
+RAGForge AI implements this concept locally using:
+
+- **Qwen** as the LLM
+- **Ollama** for local model execution
+- **Qwen3 Embedding** for vector embeddings
+- **Qdrant** as the vector database
+- **BM25** for sparse keyword retrieval
+- **LangChain** for RAG orchestration
+- **FastAPI** for the backend API
+- **HTML, CSS and JavaScript** for the frontend
+- **LangSmith** for optional tracing and observability
+
+The entire core workflow can run locally without requiring a paid cloud LLM API.
+
+---
+
+# 🎯 Project Objective
+
+The main objective of RAGForge AI is to understand and implement a practical **GenAI RAG system from end to end**.
+
+The project focuses on understanding:
+
+- How LLM applications work
+- How embeddings represent text
+- How vector databases store embeddings
+- How semantic search works
+- How BM25 keyword retrieval works
+- How hybrid retrieval combines different retrieval strategies
+- How LangChain orchestrates an RAG pipeline
+- How local LLMs can be served using Ollama
+- How Qwen can be used as an open/local LLM
+- How conversation memory works
+- How multi-user document isolation can be implemented
+- How LangSmith can be used for observability
+
+---
+
+# ✨ Key Features
+
+| **Feature** | **Details** |
 |---|---|
-| **Hybrid retrieval** | BM25 (rank-bm25) + dense semantic search merged at query time |
-| **Local LLM** | Ollama — default model `qwen2.5:3b`, swap via `.env` |
-| **Local embeddings** | Ollama embedding model — default `qwen3-embedding:0.6b` |
-| **Vector store** | Qdrant running in Docker |
-| **Multi-user scoping** | Documents and retrieval are isolated by `user_id` |
-| **Session memory** | Per-session chat history via `session_id` (in-process) |
-| **File ingest** | `.txt` and `.md` via path or browser upload |
-| **Tracing** | LangSmith traces when `LANGSMITH_TRACING=true` |
-| **Frontend** | Standalone static UI served separately on port 3000 |
+| **Hybrid Retrieval** | BM25 sparse retrieval + dense semantic search merged at query time |
+| **Local LLM** | Ollama running a local Qwen model for answer generation |
+| **Local Embeddings** | Qwen3 Embedding model running through Ollama |
+| **Vector Store** | Qdrant running locally through Docker |
+| **RAG Pipeline** | Retrieves relevant document context before generating an answer |
+| **Multi-User Scoping** | Documents and retrieval are isolated using `user_id` |
+| **Session Memory** | Conversation history is maintained using `session_id` |
+| **File Ingestion** | Supports `.txt` and `.md` document uploads |
+| **Browser Upload** | Documents can be uploaded directly from the frontend |
+| **Grounded Answers** | Answers are generated using retrieved document context |
+| **LangChain** | Used for chunking, embeddings, prompting and LLM integration |
+| **LangSmith** | Optional tracing and observability |
+| **FastAPI** | REST API backend with Swagger/OpenAPI documentation |
+| **Frontend** | Lightweight browser-based user interface |
+| **Local-First** | Core LLM and embedding inference can run locally |
 
 ---
 
-## Stack
+# 🧠 How RAGForge AI Works
 
-- **FastAPI** — API framework
-- **Ollama** — local LLM and embedding inference
-- **Qdrant** — vector store (Docker)
-- **LangChain** — chunking, embeddings, prompting, memory
-- **rank-bm25** — sparse BM25 retrieval
-- **LangSmith** — optional observability and tracing
-
----
-
-## Quickstart
-
-### Prerequisites
-
-- [Ollama](https://ollama.com) installed and running
-- Docker installed
-- Python 3.10+ with conda or venv
-
-### 1. Pull models
-
-```bash
-ollama pull qwen2.5:3b
-ollama pull qwen3-embedding:0.6b
-```
-
-### 2. Start Qdrant
-
-```bash
-docker run -d --name qdrant-local -p 6333:6333 qdrant/qdrant
-```
-
-### 3. Install dependencies
-
-```bash
+```text
+                    USER
+                     │
+                     ▼
+            ┌─────────────────┐
+            │  Web Frontend   │
+            └────────┬────────┘
+                     │
+                     ▼
+            ┌─────────────────┐
+            │    FastAPI      │
+            │     Backend     │
+            └────────┬────────┘
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+          ▼                     ▼
+     Upload File            User Question
+          │                     │
+          ▼                     ▼
+    Load Document         Hybrid Retrieval
+          │               ┌─────┴─────┐
+          ▼               │           │
+    Text Chunking        BM25      Dense Search
+          │               │           │
+          ▼               └─────┬─────┘
+    Qwen Embeddings              │
+          │                      ▼
+          ▼               Relevant Context
+       Qdrant                     │
+          │                       ▼
+          └──────────────►  LangChain Prompt
+                                  │
+                                  ▼
+                           Ollama + Qwen
+                                  │
+                                  ▼
+                          Grounded Answer
+                                  │
+                                  ▼
+                                USER
+                                🛠️ Requirements
+Python 3.10+
+Ollama
+Docker Desktop
+Git
+VS Code
+📦 Installation
+1. Clone Repository
+git clone https://github.com/dimpalmang20/RAGForge-AI.git
+cd RAGForge-AI
+2. Create Virtual Environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+3. Install Dependencies
 cd hybrid_rag_local
-conda activate myenv
-pip install -r requirements.txt
-```
+python -m pip install -r requirements.txt
+4. Install Ollama Models
+ollama pull qwen2.5:7b
+ollama pull qwen3-embedding:0.6b
 
-### 4. Configure environment
+Check:
 
-```bash
-cp .env.example .env
-# edit .env with your model names and optional LangSmith key
-```
+ollama list
+5. Start Qdrant
+docker run -d --name qdrant-local -p 6333:6333 qdrant/qdrant
 
-### 5. Start the API
+Check:
 
-```bash
-uvicorn app.main:app --reload
-```
+docker ps
+⚙️ Environment Configuration
 
-API docs at `http://127.0.0.1:8000/docs`
+Create .env inside hybrid_rag_local/:
 
-### 6. Start the frontend (optional)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_LLM_MODEL=qwen2.5:7b
+OLLAMA_EMBED_MODEL=qwen3-embedding:0.6b
+QDRANT_URL=http://localhost:6333
+QDRANT_COLLECTION=hybrid_rag_local
+LANGSMITH_API_KEY=
+LANGSMITH_TRACING=false
+LANGSMITH_PROJECT=RAGForge-AI
+TOP_K=5
+RERANK_TOP_K=0
+▶️ Run Backend
 
-```bash
-cd frontend
+From:
+
+RAGForge-AI/hybrid_rag_local
+
+run:
+
+python -m uvicorn app.main:app --reload
+
+Backend:
+
+http://127.0.0.1:8000
+
+Swagger API:
+
+http://127.0.0.1:8000/docs
+
+Health Check:
+
+http://127.0.0.1:8000/health
+🌐 Run Frontend
+
+Open a second terminal:
+
+cd "C:\Users\Dimpal\RAGForge AI\hybrid_rag_local\frontend"
 python -m http.server 3000
-```
 
-Open `http://127.0.0.1:3000`
+Open:
 
----
+http://127.0.0.1:3000
+🧑‍💻 How It Works
+Upload Document
+      ↓
+Text Chunking
+      ↓
+Qwen Embeddings
+      ↓
+Qdrant
+      ↓
+User Question
+      ↓
+BM25 + Dense Search
+      ↓
+Relevant Context
+      ↓
+LangChain
+      ↓
+Qwen via Ollama
+      ↓
+Grounded Answer
+💬 Example
 
-## Quick API Test
+Upload a document containing:
 
-**Ingest a document:**
+Customers can request a refund within 30 days.
 
-```json
-POST /ingest
-{
-  "file_path": "D:/Hybrid/mini_rag_test.txt",
-  "user_id": "alice"
-}
-```
+Ask:
 
-**Ask a question:**
+How many days do I have to request a refund?
 
-```json
-POST /chat
-{
-  "user_id": "alice",
-  "session_id": "session-1",
-  "message": "What does this document cover?"
-}
-```
+RAGForge AI retrieves the relevant document context and Qwen generates the answer.
 
----
+📌 Supported Files
+.txt
+.md
+👨‍💻 Author
 
-## Current Limitations
+Dimpal
 
-- Session memory is in-process and resets on restart
-- No authentication or persistent session store
-- Supported ingest formats: `.txt` and `.md` only (no PDF)
-- Frontend is a lightweight internal tool, not a production UI
+GitHub: https://github.com/dimpalmang20
 
----
-
-## Deployment
-
-See [hybrid_rag_local/DEPLOYMENT.md](hybrid_rag_local/DEPLOYMENT.md) for EC2 and EKS deployment guidance.
-
----
-
-## Repo Name Suggestions
-
-| Name | Why |
-|---|---|
-| `hybrid-rag-local` | Direct, accurate, searchable |
-| `local-rag-stack` | Emphasizes the full self-hosted stack |
-| `rag-fusion-local` | Highlights the BM25 + dense fusion angle |
-| `ollama-rag-api` | Tech-stack-forward, Ollama is the key differentiator |
-| `multiuser-rag` | Emphasizes the user-scoped isolation feature |
-| `bm25-dense-rag` | Precise — names the two retrieval methods |
-
-**Recommended:** `hybrid-rag-local` — clean, Google-friendly, matches the codebase naming, and signals both the hybrid retrieval approach and local-first design.
+Project: https://github.com/dimpalmang20/RAGForge-AI
